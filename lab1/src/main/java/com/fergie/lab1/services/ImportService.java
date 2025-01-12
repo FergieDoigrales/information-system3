@@ -5,6 +5,7 @@ import com.fergie.lab1.dto.MovieDTO;
 import com.fergie.lab1.models.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -38,8 +39,7 @@ public class ImportService {
         this.importAuditService = importAuditService;
 
     }
-
-    @Transactional
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public ImportAudit importFile(MultipartFile file, Long userId, String fileHash) throws IOException {
         Optional<ImportAudit> existingAudit = importAuditService.findByHash(fileHash, userId);
         if (existingAudit.isPresent()) {
@@ -80,10 +80,9 @@ public class ImportService {
             audit.setImportDate(new Date());
             audit.setStatus(validRecords >= 0.5 * totalRecords ? ImportStatus.SUCCESS : ImportStatus.FAILED);
 
-            importAuditService.save(audit);
-
             if (errorRecords < 0.5 * totalRecords) {
                 moviesService.saveAll(movies);
+                importAuditService.save(audit);
             } else {
                 throw new IllegalArgumentException("More than 50% of records are invalid");
             }

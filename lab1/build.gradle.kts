@@ -31,14 +31,17 @@ configurations {
 
 
 dependencies {
-    implementation("org.eclipse.persistence:eclipselink:3.0.2")
-    implementation("org.springframework.boot:spring-boot-starter-data-jpa"){
-        exclude(group = "org.hibernate", module = "hibernate-core")
-    }
-    implementation("org.hibernate.validator:hibernate-validator:8.0.0.Final"){
-        exclude(group = "org.hibernate", module = "hibernate-core")
-        exclude(group = "org.hibernate", module = "hibernate-entitymanager")
-    }
+    implementation ("org.hibernate:hibernate-core:6.2.0.Final")
+//    implementation("org.eclipse.persistence:eclipselink:3.0.2")
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+//    {
+//        exclude(group = "org.hibernate", module = "hibernate-core")
+//    }
+    implementation("org.hibernate.validator:hibernate-validator:8.0.0.Final")
+//    {
+//        exclude(group = "org.hibernate", module = "hibernate-core")
+//        exclude(group = "org.hibernate", module = "hibernate-entitymanager")
+//    }
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.postgresql:postgresql:42.7.2")

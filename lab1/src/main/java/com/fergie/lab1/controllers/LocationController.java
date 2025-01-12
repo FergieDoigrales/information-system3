@@ -35,7 +35,7 @@ public class LocationController {
     }
 
     @PostMapping("/save")
-    public ResponseEntity<?> saveLocation(@ModelAttribute("location") LocationDTO locationDTO, Long authorId) {
+    public ResponseEntity<?> saveLocation(@ModelAttribute("location") LocationDTO locationDTO) {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();

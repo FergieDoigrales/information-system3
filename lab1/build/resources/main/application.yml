@@ -10,21 +10,35 @@ spring:
     username: s367900
     password: NHuAaqTUhW4OskIS
     driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 100
+      connection-timeout: 50000
+      idle-timeout: 600000
   jpa:
+    generate-ddl: true
     show-sql: true
+    hibernate:
+      ddl-auto: update
     properties:
-      javax:
-        persistence:
-          provider: org.eclipse.persistence.jpa.PersistenceProvider
-      eclipselink:
-        ddl-generation: create-or-extend-tables
-        ddl-generation.output-mode: database
-        weaver.disable: true
-        cache.shared.default: false
-  autoconfigure:
-    exclude:
-      - org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration
-logging:
-  level:
-    org:
-      springframework: trace
+      hibernate:
+        format_sql: true
+        show-sql: true
+#  jpa:
+#    show-sql: true
+#    properties:
+#      javax:
+#        persistence:
+#          provider: org.eclipse.persistence.jpa.PersistenceProvider
+#      eclipselink:
+#        ddl-generation: create-or-extend-tables
+#        ddl-generation.output-mode: database
+#        weaver.disable: true
+#        cache.shared.default: false
+##        transaction.isolation-level: TRANSACTION_SERIALIZABLE
+#  autoconfigure:
+#    exclude:
+#      - org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration
+#logging:
+#  level:
+#    org:
+#      springframework: trace

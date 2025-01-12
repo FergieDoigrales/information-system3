@@ -1,5 +1,6 @@
 package com.fergie.lab1.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fergie.lab1.dto.MovieDTO;
 import com.fergie.lab1.models.Movie;
 import com.fergie.lab1.security.CustomUserDetails;
@@ -16,7 +17,10 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
@@ -95,11 +99,19 @@ public class MoviesController {
 
     @PostMapping("/update")
     public ResponseEntity<?> updateMovie(@ModelAttribute("movie") MovieDTO movieDTO,
+                                         @RequestParam(value = "file", required = false) MultipartFile file,
                                          @RequestParam(defaultValue = "0") int page,
                                          @RequestParam(defaultValue = "10") int size,
-                                         @RequestParam(defaultValue = "name") String sort) {
+                                         @RequestParam(defaultValue = "name") String sort) throws IOException {
 
         CustomUserDetails userDetails = getUserInfo();
+
+        if (movieDTO == null) {
+            String fileContent = new String(file.getBytes(), StandardCharsets.UTF_8);
+            ObjectMapper objectMapper = new ObjectMapper();
+            movieDTO = objectMapper.readValue(fileContent, MovieDTO.class);
+        }
+
         Movie movie = convertToMovie(movieDTO);
 
         try {
