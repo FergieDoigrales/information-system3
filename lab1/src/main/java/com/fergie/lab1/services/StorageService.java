@@ -1,10 +1,13 @@
 package com.fergie.lab1.services;
 
 import io.minio.*;
+import io.minio.errors.MinioException;
 import io.minio.http.Method;
 import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
+import java.net.ConnectException;
+import java.net.UnknownHostException;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -26,17 +29,6 @@ public class StorageService {
             if (!found) {
                 minioClient.makeBucket(MakeBucketArgs.builder().bucket(bucketName).build());
             }
-
-//            boolean tempBucketFound = minioClient.bucketExists(BucketExistsArgs.builder().bucket(tempBucket).build());
-//            if (!tempBucketFound) {
-//                minioClient.makeBucket(MakeBucketArgs.builder().bucket(tempBucket).build());
-//            }
-//
-//            minioClient.putObject(
-//                    PutObjectArgs.builder().bucket(tempBucket).object(tempObjectName).stream(
-//                                    inputStream, inputStream.available(), -1)
-//                            .contentType(contentType)
-//                            .build());
 
             minioClient.copyObject(
                     CopyObjectArgs.builder()
@@ -79,9 +71,15 @@ public class StorageService {
         String tempObjectName = "temp-" + objectName;
         try {
             minioClient.removeObject(RemoveObjectArgs.builder().bucket(tempBucket).object(tempObjectName).build());
-//            minioClient.removeObject(RemoveObjectArgs.builder().bucket(bucketName).object(objectName).build());
+            minioClient.removeObject(RemoveObjectArgs.builder().bucket(bucketName).object(objectName).build());
+        } catch (MinioException e) {
+            System.out.println("Failed to connect MinIO:  " + e.getMessage());
+        } catch (ConnectException e) {
+            System.out.println("Couldn't connect to MinIO: " + e.getMessage());
+        } catch (UnknownHostException e) {
+            System.out.println("Couldn't find MinIO server: " + e.getMessage());
         } catch (Exception e) {
-            throw new RuntimeException("Error deleting file", e);
+            System.out.println("Failed to connect MinIO: " + e.getMessage());
         }
     }
 

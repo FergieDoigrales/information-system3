@@ -1,11 +1,10 @@
 package com.fergie.lab1.services;
 
-import com.fergie.lab1.models.ImportAudit;
 import com.fergie.lab1.models.Movie;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import java.io.InputStream;
 import java.util.List;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 @Component
 public class CoordinatorComponent implements TransactionParticipant{
@@ -18,21 +17,26 @@ public class CoordinatorComponent implements TransactionParticipant{
     }
 
     public void execute(String bucketName, String objectName, InputStream inputStream, String contentType, List<Movie> movies){
-        if (prepare(bucketName, objectName, inputStream, contentType, movies)) {
+        Object[] result = prepare(bucketName, objectName, inputStream, contentType, movies);
+        boolean status = (Boolean) result[0];
+        String message = (String) result[1];
+
+        if (status) {
             commit(bucketName, objectName, inputStream, contentType);
         } else {
-            rollback(bucketName, objectName);
+            rollback(bucketName, objectName, message);
         }
     }
     @Override
-    public boolean prepare(String bucketName, String objectName, InputStream inputStream, String contentType, List<Movie> movies){
+    public Object[] prepare(String bucketName, String objectName, InputStream inputStream, String contentType, List<Movie> movies){
+
         try {
             moviesService.saveAll(movies);
             storageService.prepareUploadFile(bucketName, objectName, inputStream, contentType);
         } catch (Exception e) {
-            return false;
+            return new Object[]{false, e.getMessage()};
         }
-        return true;
+        return new Object[]{true, null};
     }
 
     @Override
@@ -44,12 +48,9 @@ public class CoordinatorComponent implements TransactionParticipant{
         }
     }
     @Override
-    public void rollback(String bucketName, String objectName){
-        try {
-            storageService.deleteFile(bucketName, objectName);
-        } catch (Exception e) {
-            throw new RuntimeException("Error during rollback occurred: " + e.getMessage());
-        }
+    public void rollback(String bucketName, String objectName, String e){
+        storageService.deleteFile(bucketName, objectName);
+        throw new RuntimeException("Rollback cause of " + e) ;
     }
 
 

@@ -6,7 +6,7 @@ import java.io.InputStream;
 import java.util.List;
 
 public interface TransactionParticipant {
-    boolean prepare(String bucketName, String objectName, InputStream inputStream, String contentType, List<Movie> movies);
+    Object[] prepare(String bucketName, String objectName, InputStream inputStream, String contentType, List<Movie> movies);
     void commit(String bucketName, String objectName, InputStream inputStream, String contentType);
-    void rollback(String bucketName, String objectName);
+    void rollback(String bucketName, String objectName, String exception);
 }

@@ -71,13 +71,6 @@ public class ImportService {
         try {
             Files.copy(file.getInputStream(), tempFilePath, StandardCopyOption.REPLACE_EXISTING);
 
-//            try (InputStream fileInputStream = Files.newInputStream(tempFilePath)) {
-//                System.out.println("Uploading file with name: " + file.getOriginalFilename());
-//                storageService.uploadFile(
-//                        "fergie", fileName, fileInputStream, file.getContentType());
-//            } catch (Exception e) {
-//                throw new IllegalArgumentException("Error during file upload", e); }
-
             List<Movie> movies = new ArrayList<>();
             List<MovieDTO> movieDTOList = objectMapper.readValue(file.getInputStream(), new TypeReference<List<MovieDTO>>() {
             });
@@ -107,16 +100,12 @@ public class ImportService {
 
             if (errorRecords < 0.5 * totalRecords) {
                 coordinatorComponent.execute("fergie", fileName, Files.newInputStream(tempFilePath), file.getContentType(), movies);
-//                moviesService.saveAll(movies);
                 importAuditService.save(audit);
             } else {
                 throw new IllegalArgumentException("More than 50% of records are invalid");
             }
             Files.deleteIfExists(tempFilePath);
             return audit;
-
-//        } catch (IllegalArgumentException e) {
-//            throw new IllegalArgumentException("More than 50% of records are invalid", e);
 
         } catch (Exception e) {
             Files.deleteIfExists(tempFilePath);
@@ -137,97 +126,6 @@ public class ImportService {
         }
     }
 
-//    @Transactional(isolation = Isolation.SERIALIZABLE)
-//    public ImportAudit importFile(MultipartFile file, Long userId, String fileHash) throws IOException {
-//        Optional<ImportAudit> existingAudit = importAuditService.findByHash(fileHash, userId);
-//        if (existingAudit.isPresent()) {
-//            ImportAudit audit = existingAudit.get();
-//            if (audit.getErrorRecords() > 0.5 * audit.getTotalRecords()) {
-//                throw new IllegalArgumentException("This file was previously rejected (more than 50% errors)");
-//            }
-//        }
-//        ObjectMapper objectMapper = new ObjectMapper();
-//
-//        int totalRecords = 0;
-//        int errorRecords = 0;
-//        int validRecords = 0;
-//        String fileId = UUID.randomUUID().toString();
-//
-//        Path tempFilePath = Files.createTempFile("import-", "-" + fileId);
-//
-//
-//        Files.copy(file.getInputStream(), tempFilePath, StandardCopyOption.REPLACE_EXISTING);
-//
-//        InputStream fileInputStream = Files.newInputStream(tempFilePath);
-//        System.out.println("Uploading file with name: " + file.getOriginalFilename());
-//        storageService.uploadFile(
-//                "fergie", file.getOriginalFilename(), fileInputStream, file.getContentType());
-//
-//        List<Movie> movies = new ArrayList<>();
-//        List<MovieDTO> movieDTOList = objectMapper.readValue(file.getInputStream(), new TypeReference<List<MovieDTO>>() {
-//        });
-//
-//        for (MovieDTO movieDTO : movieDTOList) {
-//            totalRecords++;
-//
-//            Movie movie = moviesService.processMovieDTO(movieDTO, userId);
-//            if (movie != null) {
-//                movies.add(saveMovieRelatedEntities(movie, userId));
-//                validRecords++;
-//            } else {
-//                errorRecords++;
-//            }
-//        }
-//
-//        ImportAudit audit = new ImportAudit();
-//        audit.setFileHash(fileHash);
-//        audit.setAuthorID(userId);
-//        audit.setTotalRecords(totalRecords);
-//        audit.setSuccessRecords(validRecords);
-//        audit.setErrorRecords(errorRecords);
-//        audit.setImportDate(new Date());
-//        audit.setStatus(validRecords >= 0.5 * totalRecords ? ImportStatus.SUCCESS : ImportStatus.FAILED);
-//
-//        if (errorRecords < 0.5 * totalRecords) {
-//            moviesService.saveAll(movies);
-//            importAuditService.save(audit);
-//        } else {
-//            throw new IllegalArgumentException("More than 50% of records are invalid");
-//        }
-//        Files.deleteIfExists(tempFilePath);
-//        return audit;
-//
-////        } catch (IllegalArgumentException e) {
-////            throw new IllegalArgumentException("More than 50% of records are invalid", e);
-//
-//    }
-
-//@Transactional(isolation = Isolation.SERIALIZABLE)
-//public ImportAudit importFile(MultipartFile file, Long userId, String fileHash) throws IOException {
-//    Optional<ImportAudit> existingAudit = importAuditService.findByHash(fileHash, userId);
-//    if (existingAudit.isPresent()) {
-//        ImportAudit audit = existingAudit.get();
-//        if (audit.getErrorRecords() > 0.5 * audit.getTotalRecords()) {
-//            throw new IllegalArgumentException("This file was previously rejected (more than 50% errors)");
-//        }
-//    }
-//    ObjectMapper objectMapper = new ObjectMapper();
-//
-//    int totalRecords = 0;
-//    int errorRecords = 0;
-//    int validRecords = 0;
-//
-//    Path tempFilePath = Files.createTempFile("import-", "-" + fileHash);
-//
-//
-//    Files.copy(file.getInputStream(), tempFilePath, StandardCopyOption.REPLACE_EXISTING);
-//
-//    InputStream fileInputStream = Files.newInputStream(tempFilePath);
-//    storageService.uploadFile(
-//            "fergie", file.getOriginalFilename(), fileInputStream, file.getContentType());
-//
-//    return null;
-//}
 
     @Transactional
     public Movie saveMovieRelatedEntities(Movie movie, Long userId) {
