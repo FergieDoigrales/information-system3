@@ -4,10 +4,14 @@ import com.fergie.lab1.models.ImportAudit;
 import com.fergie.lab1.security.CustomUserDetails;
 import com.fergie.lab1.services.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.Authentication;
@@ -17,6 +21,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
@@ -29,12 +36,16 @@ public class ImportController {
     private final ImportService importService;
     private final ImportAuditService importAuditService;
     private final SimpMessagingTemplate messagingTemplate;
+    private final StorageService storageService;
 
     @Autowired
-    public ImportController(ImportService importService, ImportAuditService importAuditService, SimpMessagingTemplate messagingTemplate) {
+    public ImportController(ImportService importService, ImportAuditService importAuditService,
+                            SimpMessagingTemplate messagingTemplate, StorageService storageService) {
         this.importService = importService;
         this.importAuditService = importAuditService;
         this.messagingTemplate = messagingTemplate;
+        this.storageService = storageService;
+
     }
 
     @GetMapping("")
@@ -81,6 +92,33 @@ public class ImportController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new HashMap<String, String>() {{
                 put("error", "Errors: " + e.getMessage());
             }});
+        }
+    }
+
+    @GetMapping("/download/{fileName}")
+    public ResponseEntity<Resource> downloadFile(@PathVariable String fileName, Model model) {
+
+        String bucketName = "fergie";
+
+        String url = storageService.generateUrl(bucketName, fileName);
+
+        model.addAttribute("downloadUrl", url);
+
+        try {
+            URL downloadUrl = new URL(url);
+            HttpURLConnection connection = (HttpURLConnection) downloadUrl.openConnection();
+            connection.setRequestMethod("GET");
+
+            InputStream inputStream = connection.getInputStream();
+
+            Resource resource = new InputStreamResource(inputStream);
+
+            return ResponseEntity.ok()
+                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
+                    .body(resource);
+        } catch (IOException e) {
+            throw new RuntimeException("Error while downloading file", e);
         }
     }
 

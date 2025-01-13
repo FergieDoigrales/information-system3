@@ -1,9 +1,11 @@
 package com.fergie.lab1.services;
 
 import io.minio.*;
+import io.minio.http.Method;
 import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class StorageService {
@@ -51,4 +53,20 @@ public class StorageService {
             throw new RuntimeException("Error during two-phase commit occurred: " + e.getMessage());
         }
     }
+
+    public String generateUrl(String bucketName, String objectName) {
+        try {
+            GetPresignedObjectUrlArgs getPresignedObjectUrlArgs = GetPresignedObjectUrlArgs.builder()
+                    .bucket(bucketName)
+                    .object(objectName)
+                    .method(Method.GET)
+                    .expiry(1, TimeUnit.HOURS) //?? ??????
+                    .build();
+
+            return minioClient.getPresignedObjectUrl(getPresignedObjectUrlArgs);
+        } catch (Exception e) {
+            throw new RuntimeException("Error generating URL", e);
+        }
+    }
+
 }

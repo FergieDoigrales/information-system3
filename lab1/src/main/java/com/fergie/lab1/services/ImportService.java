@@ -65,7 +65,7 @@ public class ImportService {
         String fileId = UUID.randomUUID().toString();
 
         Path tempFilePath = Files.createTempFile("import-", "-" + fileId);
-        String fileName = file.getOriginalFilename() + "-" + fileId;
+        String fileName = fileId + "-" + file.getOriginalFilename();
 
         try {
             Files.copy(file.getInputStream(), tempFilePath, StandardCopyOption.REPLACE_EXISTING);
