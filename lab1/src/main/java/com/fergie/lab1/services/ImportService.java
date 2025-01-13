@@ -33,10 +33,12 @@ public class ImportService {
     private final LocationDetailsService locationDetailsService;
     private final ImportAuditService importAuditService;
     private final StorageService storageService;
+    private final CoordinatorComponent coordinatorComponent;
 
     @Autowired
     public ImportService(MoviesService moviesService, CoordinatesService coordinatesService, ImportAuditService importAuditService, StorageService storageService,
-                         PeopleService peopleService, LocationService locationService, LocationDetailsService locationDetailsService) {
+                         PeopleService peopleService, LocationService locationService, LocationDetailsService locationDetailsService,
+                         CoordinatorComponent coordinatorComponent) {
         this.moviesService = moviesService;
         this.coordinatesService = coordinatesService;
         this.peopleService = peopleService;
@@ -44,8 +46,7 @@ public class ImportService {
         this.locationDetailsService = locationDetailsService;
         this.importAuditService = importAuditService;
         this.storageService = storageService;
-
-
+        this.coordinatorComponent = coordinatorComponent;
     }
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public ImportAudit importFile(MultipartFile file, Long userId, String fileHash) throws IOException {
@@ -70,12 +71,12 @@ public class ImportService {
         try {
             Files.copy(file.getInputStream(), tempFilePath, StandardCopyOption.REPLACE_EXISTING);
 
-            try (InputStream fileInputStream = Files.newInputStream(tempFilePath)) {
-                System.out.println("Uploading file with name: " + file.getOriginalFilename());
-                storageService.uploadFile(
-                        "fergie", fileName, fileInputStream, file.getContentType());
-            } catch (Exception e) {
-                throw new IllegalArgumentException("Error during file upload", e); }
+//            try (InputStream fileInputStream = Files.newInputStream(tempFilePath)) {
+//                System.out.println("Uploading file with name: " + file.getOriginalFilename());
+//                storageService.uploadFile(
+//                        "fergie", fileName, fileInputStream, file.getContentType());
+//            } catch (Exception e) {
+//                throw new IllegalArgumentException("Error during file upload", e); }
 
             List<Movie> movies = new ArrayList<>();
             List<MovieDTO> movieDTOList = objectMapper.readValue(file.getInputStream(), new TypeReference<List<MovieDTO>>() {
@@ -105,7 +106,8 @@ public class ImportService {
             audit.setFileName(fileName);
 
             if (errorRecords < 0.5 * totalRecords) {
-                moviesService.saveAll(movies);
+                coordinatorComponent.execute("fergie", fileName, Files.newInputStream(tempFilePath), file.getContentType(), movies);
+//                moviesService.saveAll(movies);
                 importAuditService.save(audit);
             } else {
                 throw new IllegalArgumentException("More than 50% of records are invalid");

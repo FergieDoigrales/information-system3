@@ -2,8 +2,22 @@ package com.fergie.lab1.util;
 
 
 import com.fergie.lab1.models.Movie;
+import com.fergie.lab1.models.Person;
+import com.fergie.lab1.repositories.MoviesRepository;
+import com.fergie.lab1.repositories.PeopleRepository;
+import com.fergie.lab1.services.MoviesService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+@Component
 public class MovieValidator {
+    private final PeopleRepository peopleRepository;
+    private final MoviesService moviesService;
+    @Autowired
+    public MovieValidator(PeopleRepository peopleRepository, MoviesService moviesService) {
+        this.peopleRepository = peopleRepository;
+        this.moviesService = moviesService;
+    }
 
     public static boolean validateMovie(Movie movie) {
         if (movie.getName() == null || movie.getName().isEmpty()) {
@@ -48,4 +62,5 @@ public class MovieValidator {
 
         return true;
     }
+
 }
