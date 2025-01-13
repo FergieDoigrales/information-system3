@@ -5,7 +5,9 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.nio.file.Path;
 import java.util.Date;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -38,4 +40,10 @@ public class ImportAudit {
 
     @Column(name = "success_records", nullable = false)
     private int successRecords;
+
+    @Column
+    private String path;
+
+    @Column
+    private String fileName;
 }

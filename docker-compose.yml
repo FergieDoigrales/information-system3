@@ -29,6 +29,20 @@ services:
     networks:
       - app-network
 
+  minio:
+    container_name: minio
+    image: bitnami/minio:2024
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: fergie
+      MINIO_ROOT_PASSWORD: fergie123456789
+    volumes:
+      - ./minio-data:/data
+    networks:
+      - app-network
+
 volumes:
   postgres_data:
     driver: local
@@ -36,3 +50,4 @@ volumes:
 networks:
   app-network:
     driver: bridge
+

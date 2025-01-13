@@ -3,12 +3,12 @@ server:
 
 spring:
   datasource:
-#    url: jdbc:postgresql://db:5432/studs
-#    username: postgres
-#    password: postgres
-    url: jdbc:postgresql://localhost:5432/studs
-    username: s367900
-    password: NHuAaqTUhW4OskIS
+    url: jdbc:postgresql://db:5432/studs
+    username: postgres
+    password: postgres
+#    url: jdbc:postgresql://localhost:5432/studs
+#    username: s367900
+#    password: NHuAaqTUhW4OskIS
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 100

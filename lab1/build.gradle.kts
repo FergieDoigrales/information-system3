@@ -57,7 +57,7 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     implementation("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
-
+    implementation ("io.minio:minio:8.4.3")
 }
 
 tasks.withType<Test> {
